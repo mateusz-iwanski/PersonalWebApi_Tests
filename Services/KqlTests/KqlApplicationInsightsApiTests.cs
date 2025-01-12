@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PersonalWebApi.Tests.Services.KqlTests
@@ -28,6 +29,8 @@ namespace PersonalWebApi.Tests.Services.KqlTests
         {
             KqlApplicationInsightsApi kql = new KqlApplicationInsightsApi(_configuration);
             var answer = await kql.ExecuteQueryAsync("traces | getschema");
+
+            var schema = JsonSerializer.Serialize(answer);
 
             // Assert
             Assert.NotNull(answer);
