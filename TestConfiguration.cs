@@ -16,6 +16,9 @@ using Microsoft.AspNetCore.Identity;
 using PersonalWebApi.Utilities.Utilities.HttUtils;
 using Microsoft.KernelMemory;
 using PersonalWebApi.Agent;
+using Microsoft.AspNetCore.Http;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Google.Protobuf.WellKnownTypes;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
@@ -35,7 +38,26 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             // Set up the service collection
             var serviceCollection = new ServiceCollection();
 
+            // Add HttpContextAccessor and Session
             serviceCollection.AddHttpContextAccessor();
+            serviceCollection.AddSession();
+
+            // Add RequestDelegate factory
+            serviceCollection.AddSingleton<RequestDelegate>(sp =>
+            {
+                var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+                return async context =>
+                {
+                    var httpContext = httpContextAccessor.HttpContext;
+                    if (httpContext != null)
+                    {
+                        await context.Response.WriteAsync("RequestDelegate is working.");
+                    }
+                };
+            });
+
+            // Add SessionMiddleware
+            serviceCollection.AddTransient<SessionMiddleware>();
 
             // Add configuration
             var configuration = new ConfigurationBuilder()
@@ -46,7 +68,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 .AddJsonFile("appsettings.Azure.json", optional: true, reloadOnChange: true)
                 .AddUserSecrets<Program>()
                 .AddEnvironmentVariables()
-                .Build(); 
+                .Build();
             serviceCollection.AddSingleton<IConfiguration>(configuration);
 
             // Manually register services
@@ -86,12 +108,13 @@ namespace PersonalWebApi.Tests.Controllers.Agent
 
                 kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
 
-                kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
+                serviceCollection.AddScoped<KernelMemoryWrapper>(provider =>
                 {
                     var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                     var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
+                    var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
 
-                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager);
+                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor);
                 });
 
                 return kernelBuilder.Build();
@@ -109,8 +132,9 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             {
                 var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                 var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
+                var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
 
-                return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager);
+                return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor);
             });
 
             // Register other necessary services
@@ -134,6 +158,11 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             Qdrant = ServiceProvider.GetRequiredService<IQdrantFileService>();
             Configuration = ServiceProvider.GetRequiredService<IConfiguration>();
             AssistantHistoryManager = ServiceProvider.GetRequiredService<IAssistantHistoryManager>();
+
+            // Initialize HttpContext
+            var context = new DefaultHttpContext();
+            ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext = context;
         }
+
     }
 }
