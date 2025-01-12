@@ -15,10 +15,10 @@ using PersonalWebApi.Extensions;
 using Microsoft.AspNetCore.Identity;
 using PersonalWebApi.Utilities.Utilities.HttUtils;
 using Microsoft.KernelMemory;
-using PersonalWebApi.Agent;
 using Microsoft.AspNetCore.Http;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Google.Protobuf.WellKnownTypes;
+using PersonalWebApi.Services.Services.History;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
@@ -41,6 +41,8 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             // Add HttpContextAccessor and Session
             serviceCollection.AddHttpContextAccessor();
             serviceCollection.AddSession();
+
+            serviceCollection.AddSingleton<IPersistentChatHistoryService, PersistentChatHistoryService>();
 
             // Add RequestDelegate factory
             serviceCollection.AddSingleton<RequestDelegate>(sp =>
@@ -98,6 +100,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 // Register IHttpContextAccessor early
                 kernelBuilder.Services.AddHttpContextAccessor();
 
+                kernelBuilder.Services.AddScoped<IPersistentChatHistoryService, PersistentChatHistoryService>();
                 kernelBuilder.Services.AddScoped<ICosmosDbService, AzureCosmosDbService>();
                 kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
                 kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
@@ -163,6 +166,5 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             var context = new DefaultHttpContext();
             ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext = context;
         }
-
     }
 }
