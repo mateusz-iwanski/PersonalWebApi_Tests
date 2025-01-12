@@ -17,7 +17,8 @@ using System.Threading.Tasks;
 namespace PersonalWebApi.Tests.Services.KernelMemory
 {
     /// <summary>
-    /// Comment RetrieveCrucialUuid to use it
+    /// Comment PersonalWebApi.Services.Services.System.RetrieveCrucialUuid to use it
+    /// or change uuid to conversationUuid which you want to access
     /// </summary>
     public class KernelMemoryBasicTests
     {
@@ -48,7 +49,7 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
             string filePath = Path.Combine(AppContext.BaseDirectory, "bajka.docx");
 
             // tag for documents
-            // MUST BE IMPLEMENTED
+            // additional
             TagCollection tagForDocument = new TagCollection();
 
             // import document to memory
