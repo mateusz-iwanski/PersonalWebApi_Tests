@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace PersonalWebApi.Tests.Services.KernelMemory
 {
+    /// <summary>
+    /// Comment RetrieveCrucialUuid to use it
+    /// </summary>
     public class KernelMemoryBasicTests
     {
         private readonly TestConfiguration _testConfig;
@@ -46,9 +49,7 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
 
             // tag for documents
             // MUST BE IMPLEMENTED
-            // sessionUuid - must exists
             TagCollection tagForDocument = new TagCollection();
-            tagForDocument.Add("sessionUuid", sessionUuid.ToString());
 
             // import document to memory
             // KernelMemoryWrapper.ImportDocumentAsync start
@@ -97,8 +98,6 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
             {
                 ["input"] = "Kto skręcił sobie nogę?",
                 ["index"] = conversationUuid.ToString(),  // MUST BE IMPLEMENTED
-                ["conversationUuid"] = conversationUuid.ToString(),  // MUST BE IMPLEMENTED
-                ["sessionUuid"] = sessionUuid.ToString()  // MUST BE IMPLEMENTED
             };
 
             // RenderedPromptFilterHandler.OnPromptRenderAsync start
