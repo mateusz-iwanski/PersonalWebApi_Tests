@@ -112,5 +112,27 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
             Xunit.Assert.NotNull(answer);
             Xunit.Assert.IsType<FunctionResult>(answer);
         }
+
+        [Fact]
+        public async Task ImportDocumentToMemoryAndSaveToBlobStorage()
+        {
+            // must be implemented
+            var conversationUuid = Guid.NewGuid();
+            var sessionUuid = Guid.NewGuid();
+
+            var pluginName = "memory";
+
+            // we will import to memory 
+            string filePath = Path.Combine(AppContext.BaseDirectory, "bajka.docx");
+
+            // import document to memory
+            // KernelMemoryWrapper.ImportDocumentAsync start
+            await _testConfig.Memory.ImportDocumentAsync(
+                filePath,
+                index: conversationUuid.ToString(),
+                documentId: Guid.NewGuid().ToString()
+                );
+
+        }
     }
 }
