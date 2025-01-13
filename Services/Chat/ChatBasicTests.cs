@@ -79,22 +79,23 @@ namespace PersonalWebApi.Tests.Services.Chat
         /// 4. Asserts that the loaded history matches the expected history (commented out for now).
         /// </summary>
         [Fact]
-        public async Task LoadPersistenChatHistoryByConversationUuid_ShouldReturnCorrectHistory()
+        public async Task LoadChatHistoryByConversationUuid_ShouldReturnCorrectHistory()
         {
             // Arrange
             var conversationUuid = Guid.NewGuid();
 
             // Act
-            var actualHistory = await _persistentChatHistoryService.LoadPersistanceConversationAsync();  // this is ChatHistory object
-            var eventStorageHistory = await _persistentChatHistoryService.LoadStorageEventsAsync();  // this is ChatHistory object
+            // load history
+            await _persistentChatHistoryService.LoadPersistanceConversationAsync();  // this is ChatHistory object
+            await _persistentChatHistoryService.LoadStorageEventsAsync();  // this is ChatHistory object
 
-            Debug.WriteLine($"################ Debug| Chat history schema\n: { JsonSerializer.Serialize(actualHistory) }");
+            Output.Write(JsonSerializer.Serialize(_persistentChatHistoryService.GetChatHistory()));
 
             // Loop through the history and write each message to the console
             int i = 1;
-            foreach (var message in actualHistory)
+            foreach (var message in _persistentChatHistoryService.GetChatHistory())
             {
-                Debug.WriteLine($"################ Debug| Message history (step: {i}) | Role: {message.Role} | Message: {message}");
+                Output.Write($"Role: {message.Role} | Message: {message}");
                 i++;
             }
 
