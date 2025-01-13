@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PersonalWebApi.Agent.MicrosoftKernelMemory;
 using PersonalWebApi.Services.Azure;
 using PersonalWebApi.Utilities.Utilities.DocumentReaders;
 using PersonalWebApi.Services.Services.Qdrant;
@@ -19,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Google.Protobuf.WellKnownTypes;
 using PersonalWebApi.Services.Services.History;
+using PersonalWebApi.Agent.Memory.Observability;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
