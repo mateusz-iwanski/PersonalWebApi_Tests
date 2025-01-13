@@ -116,8 +116,9 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                     var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                     var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
                     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+                    var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
 
-                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor);
+                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
                 });
 
                 return kernelBuilder.Build();
@@ -136,8 +137,9 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                 var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
                 var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+                var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
 
-                return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor);
+                return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
             });
 
             // Register other necessary services
