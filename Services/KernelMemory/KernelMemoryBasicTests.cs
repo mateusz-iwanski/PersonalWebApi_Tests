@@ -46,7 +46,7 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
             var pluginName = "memory";
 
             // we will import to memory 
-            string filePath = Path.Combine(AppContext.BaseDirectory, "bajka.docx");
+            string filePath = "https://personalblobstore.blob.core.windows.net/library/bajka.docx"; //Path.Combine(AppContext.BaseDirectory, "bajka.docx");
 
             // tag for documents
             // additional
@@ -106,7 +106,7 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
 
             var answer = await myFunction.InvokeAsync(_testConfig.Kernel, arguments);
 
-            Console.WriteLine(answer);
+            Output.Write(answer.ToString());
 
             // Assert
             Xunit.Assert.NotNull(answer);
@@ -124,6 +124,7 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
 
             // we will import to memory 
             string filePath = Path.Combine(AppContext.BaseDirectory, "bajka.docx");
+            // "https://personalblobstore.blob.core.windows.net/library/bajka.docx"
 
             // import document to memory
             // KernelMemoryWrapper.ImportDocumentAsync start
