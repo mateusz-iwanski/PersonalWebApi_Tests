@@ -1,10 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using PersonalWebApi.Agent.Memory.Observability;
+using PersonalWebApi.Agent.SemanticKernel.Plugins.KernelMemoryPlugin;
 using PersonalWebApi.Agent.SemanticKernel.Plugins.StoragePlugins.AzureBlob;
 using PersonalWebApi.Exceptions;
 using PersonalWebApi.Services.Azure;
+using PersonalWebApi.Services.Services.History;
 using PersonalWebApi.Tests.Controllers.Agent;
 using System;
 using System.Collections.Generic;
@@ -52,13 +57,34 @@ namespace PersonalWebApi.Tests.Services.Plugins
                .AddEnvironmentVariables()
                .Build();
 
+            kernelBuilder.Services.AddHttpContextAccessor();
+
             // DI
             kernelBuilder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
             kernelBuilder.Services.AddSingleton<IConfiguration>(configuration);
 
+            IKernelMemory memory = new KernelMemoryBuilder()
+                  .WithOpenAIDefaults(apiKey)
+                  .Build<MemoryServerless>();
+
+            kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
+            kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
+            kernelBuilder.Services.AddScoped<ICosmosDbService, AzureCosmosDbService>();
+
+            kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
+            {
+                var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
+                var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
+                var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+                var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
+
+                return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
+            });
+
             // add plugin
 
             kernelBuilder.Plugins.AddFromType<AzureBlobPlugin>();
+            kernelBuilder.Plugins.AddFromType<KernelMemoryPlugin>();
             Kernel kernel = kernelBuilder.Build();
 
             // without plugin
@@ -69,8 +95,18 @@ namespace PersonalWebApi.Tests.Services.Plugins
             // with plugin
             OpenAIPromptExecutionSettings settings = new() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() };
             var resultPlugin = await kernel.InvokePromptAsync("Pokaż jakie kontenery są na blob azure?", new(settings));
-
             Output.Write(resultPlugin.ToString());
+
+
+
+            //var resultPluginfilelist = await kernel.InvokePromptAsync("Pokaż jakie są pliki na blob azure?", new(settings));
+            //Output.Write(resultPluginfilelist.ToString());
+
+            var resultPluginfilelist = await kernel.InvokePromptAsync("Znajdź na blob azure plik, nazywa się bajka, znajdź uri/url i tak wczytaj go do pamięci kernel, zapytaj pamięć kto złamał nogę?", new(settings));
+            Output.Write(resultPluginfilelist.ToString());
+
+
+
         }
     }
 }
