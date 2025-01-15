@@ -19,6 +19,11 @@ using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Google.Protobuf.WellKnownTypes;
 using PersonalWebApi.Services.Services.History;
 using PersonalWebApi.Agent.Memory.Observability;
+using PersonalWebApi.Agent.SemanticKernel.Plugins.KernelMemoryPlugin;
+using PersonalWebApi.Agent.SemanticKernel.Plugins.StoragePlugins.AzureBlob;
+using PersonalWebApi.Utilities.WebScrapper;
+using PersonalWebApi.Utilities.WebScrappers;
+using PersonalWebApi.Services.WebScrapper;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
@@ -104,12 +109,24 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 kernelBuilder.Services.AddScoped<ICosmosDbService, AzureCosmosDbService>();
                 kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
                 kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
+                kernelBuilder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+                kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
+                kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
 
                 IKernelMemory memory = new KernelMemoryBuilder()
                     .WithOpenAIDefaults(apiKey)
                     .Build<MemoryServerless>();
 
                 kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
+                kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
+                {
+                    var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
+                    var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
+                    var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+                    var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
+
+                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
+                });
 
                 serviceCollection.AddScoped<KernelMemoryWrapper>(provider =>
                 {
@@ -120,6 +137,10 @@ namespace PersonalWebApi.Tests.Controllers.Agent
 
                     return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
                 });
+
+                // add plugin
+                kernelBuilder.Plugins.AddFromType<KernelMemoryPlugin>();
+                kernelBuilder.Plugins.AddFromType<AzureBlobPlugin>();
 
                 return kernelBuilder.Build();
             });
