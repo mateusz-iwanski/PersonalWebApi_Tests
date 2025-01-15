@@ -8,7 +8,8 @@ using PersonalWebApi.Agent.Memory.Observability;
 using PersonalWebApi.Agent.SemanticKernel.Plugins.KernelMemoryPlugin;
 using PersonalWebApi.Agent.SemanticKernel.Plugins.StoragePlugins.AzureBlob;
 using PersonalWebApi.Exceptions;
-using PersonalWebApi.Services.Azure;
+using PersonalWebApi.Services.FileStorage;
+using PersonalWebApi.Services.NoSQLDB;
 using PersonalWebApi.Services.Services.History;
 using PersonalWebApi.Tests.Controllers.Agent;
 using System;
@@ -60,7 +61,7 @@ namespace PersonalWebApi.Tests.Services.Plugins
             kernelBuilder.Services.AddHttpContextAccessor();
 
             // DI
-            kernelBuilder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+            kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
             kernelBuilder.Services.AddSingleton<IConfiguration>(configuration);
 
             IKernelMemory memory = new KernelMemoryBuilder()
@@ -69,14 +70,14 @@ namespace PersonalWebApi.Tests.Services.Plugins
 
             kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
             kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
-            kernelBuilder.Services.AddScoped<ICosmosDbService, AzureCosmosDbService>();
+            kernelBuilder.Services.AddScoped<INoSqlDbService, AzureCosmosDbService>();
 
             kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
             {
                 var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                 var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
                 var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
+                var blolStorageConnector = provider.GetRequiredService<IFileStorageService>();
 
                 return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
             });

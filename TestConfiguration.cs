@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PersonalWebApi.Services.Azure;
 using PersonalWebApi.Utilities.Utilities.DocumentReaders;
 using PersonalWebApi.Services.Services.Qdrant;
 using Microsoft.SemanticKernel;
@@ -24,6 +23,8 @@ using PersonalWebApi.Agent.SemanticKernel.Plugins.StoragePlugins.AzureBlob;
 using PersonalWebApi.Utilities.WebScrapper;
 using PersonalWebApi.Utilities.WebScrappers;
 using PersonalWebApi.Services.WebScrapper;
+using PersonalWebApi.Services.FileStorage;
+using PersonalWebApi.Services.NoSQLDB;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
@@ -32,7 +33,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
         public ServiceProvider ServiceProvider { get; private set; }
         public Kernel Kernel { get; private set; }
         public KernelMemoryWrapper Memory { get; private set; }
-        public IBlobStorageService BlobStorage { get; private set; }
+        public IFileStorageService BlobStorage { get; private set; }
         public IDocumentReaderDocx DocumentReaderDocx { get; private set; }
         public IQdrantFileService Qdrant { get; private set; }
         public IConfiguration Configuration { get; private set; }
@@ -106,10 +107,10 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 kernelBuilder.Services.AddHttpContextAccessor();
 
                 kernelBuilder.Services.AddScoped<IPersistentChatHistoryService, PersistentChatHistoryService>();
-                kernelBuilder.Services.AddScoped<ICosmosDbService, AzureCosmosDbService>();
+                kernelBuilder.Services.AddScoped<INoSqlDbService, AzureCosmosDbService>();
                 kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
                 kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
-                kernelBuilder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+                kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
                 kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
                 kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
 
@@ -123,7 +124,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                     var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                     var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
                     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                    var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
+                    var blolStorageConnector = provider.GetRequiredService<IFileStorageService>();
 
                     return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
                 });
@@ -133,7 +134,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                     var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                     var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
                     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                    var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
+                    var blolStorageConnector = provider.GetRequiredService<IFileStorageService>();
 
                     return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
                 });
@@ -158,19 +159,19 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                 var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
                 var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                var blolStorageConnector = provider.GetRequiredService<IBlobStorageService>();
+                var blolStorageConnector = provider.GetRequiredService<IFileStorageService>();
 
                 return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blolStorageConnector);
             });
 
             // Register other necessary services
             serviceCollection.AddScoped<IAccountService, AccountService>();
-            serviceCollection.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+            serviceCollection.AddScoped<IFileStorageService, AzureBlobStorageService>();
             serviceCollection.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
             serviceCollection.AddScoped<IQdrantFileService, QdrantFileService>();
             serviceCollection.AddScoped<QdrantRestApiClient>();
             serviceCollection.AddScoped<IEmbedding, EmbeddingOpenAi>();
-            serviceCollection.AddScoped<ICosmosDbService, AzureCosmosDbService>();
+            serviceCollection.AddScoped<INoSqlDbService, AzureCosmosDbService>();
             serviceCollection.AddScoped<IApiClient, ApiClient>();
 
             // Build the service provider
@@ -179,7 +180,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             // Resolve the dependencies
             Kernel = ServiceProvider.GetRequiredService<Kernel>();
             Memory = ServiceProvider.GetRequiredService<KernelMemoryWrapper>();
-            BlobStorage = ServiceProvider.GetRequiredService<IBlobStorageService>();
+            BlobStorage = ServiceProvider.GetRequiredService<IFileStorageService>();
             DocumentReaderDocx = ServiceProvider.GetRequiredService<IDocumentReaderDocx>();
             Qdrant = ServiceProvider.GetRequiredService<IQdrantFileService>();
             Configuration = ServiceProvider.GetRequiredService<IConfiguration>();
