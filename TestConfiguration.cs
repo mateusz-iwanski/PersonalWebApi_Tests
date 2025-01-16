@@ -35,7 +35,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
         public KernelMemoryWrapper Memory { get; private set; }
         public IFileStorageService BlobStorage { get; private set; }
         public IDocumentReaderDocx DocumentReaderDocx { get; private set; }
-        public IQdrantFileService Qdrant { get; private set; }
+        public IQdrantService Qdrant { get; private set; }
         public IConfiguration Configuration { get; private set; }
         public IAssistantHistoryManager AssistantHistoryManager { get; private set; }
 
@@ -111,7 +111,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 kernelBuilder.Services.AddScoped<INoSqlDbService, AzureCosmosDbService>();
                 kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
                 kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
-                kernelBuilder.Services.AddScoped<IQdrantFileService, QdrantFileService>(); // Ensure this is registered before use
+                kernelBuilder.Services.AddScoped<IQdrantService, QdrantService>(); // Ensure this is registered before use
                 kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
                 kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
                 kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
@@ -170,7 +170,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             serviceCollection.AddScoped<IAccountService, AccountService>();
             serviceCollection.AddScoped<IFileStorageService, AzureBlobStorageService>();
             serviceCollection.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
-            serviceCollection.AddScoped<IQdrantFileService, QdrantFileService>(); // Ensure this is registered before use
+            serviceCollection.AddScoped<IQdrantService, QdrantService>(); // Ensure this is registered before use
             serviceCollection.AddScoped<QdrantRestApiClient>();
             serviceCollection.AddScoped<IEmbedding, EmbeddingOpenAi>();
             serviceCollection.AddScoped<INoSqlDbService, AzureCosmosDbService>();
@@ -184,7 +184,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             Memory = ServiceProvider.GetRequiredService<KernelMemoryWrapper>();
             BlobStorage = ServiceProvider.GetRequiredService<IFileStorageService>();
             DocumentReaderDocx = ServiceProvider.GetRequiredService<IDocumentReaderDocx>();
-            Qdrant = ServiceProvider.GetRequiredService<IQdrantFileService>();
+            Qdrant = ServiceProvider.GetRequiredService<IQdrantService>();
             Configuration = ServiceProvider.GetRequiredService<IConfiguration>();
             AssistantHistoryManager = ServiceProvider.GetRequiredService<IAssistantHistoryManager>();
 
