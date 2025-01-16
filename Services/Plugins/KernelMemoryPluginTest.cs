@@ -2,7 +2,6 @@
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel;
 using PersonalWebApi.Agent.SemanticKernel.Plugins.StoragePlugins.AzureBlob;
-using PersonalWebApi.Services.Azure;
 using PersonalWebApi.Tests.Controllers.Agent;
 using System;
 using System.Collections.Generic;
