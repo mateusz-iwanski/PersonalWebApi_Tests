@@ -18,6 +18,7 @@ using Microsoft.KernelMemory;
 using PersonalWebApi.Services.Services.History;
 using NetTopologySuite.Utilities;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PersonalWebApi.Tests.Services.Plugins
 {
@@ -32,6 +33,7 @@ namespace PersonalWebApi.Tests.Services.Plugins
         /// <summary>
         /// Initializes a new instance of the <see cref="KernelMemoryPluginTest"/> class.
         /// </summary>
+        [Experimental("SKEXP0050")]
         public KernelMemoryPluginTest()
         {
             _testConfig = new TestConfiguration();
