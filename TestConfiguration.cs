@@ -25,6 +25,8 @@ using PersonalWebApi.Utilities.WebScrappers;
 using PersonalWebApi.Services.WebScrapper;
 using PersonalWebApi.Services.FileStorage;
 using PersonalWebApi.Services.NoSQLDB;
+using PersonalWebApi.Services.Agent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
@@ -39,6 +41,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
         public IConfiguration Configuration { get; private set; }
         public IAssistantHistoryManager AssistantHistoryManager { get; private set; }
 
+        [Experimental("SKEXP0050")] //s semantic text chunker
         public TestConfiguration()
         {
             // Set up the service collection
@@ -113,8 +116,11 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
                 kernelBuilder.Services.AddScoped<IQdrantService, QdrantService>(); // Ensure this is registered before use
                 kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+                kernelBuilder.Services.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
                 kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
                 kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
+                kernelBuilder.Services.AddScoped<ITextChunker, SemanticKernelTextChunker>();
+                kernelBuilder.Services.AddScoped<IQdrantService, QdrantService>();
 
                 IKernelMemory memory = new KernelMemoryBuilder()
                     .WithOpenAIDefaults(apiKey)
