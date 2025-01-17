@@ -6,6 +6,7 @@ using PersonalWebApi.Tests.Controllers.Agent;
 using PersonalWebApi.Utilities.Kql;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -18,6 +19,7 @@ namespace PersonalWebApi.Tests.Services.KqlTests
         private readonly TestConfiguration _testConfig;
         private readonly IConfiguration _configuration;
 
+        [Experimental("SKEXP0050")]
         public KqlApplicationInsightsApiTests()
         {
             _testConfig = new TestConfiguration();
