@@ -5,6 +5,7 @@ using PersonalWebApi.Tests.Controllers.Agent;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace PersonalWebApi.Tests.Services.Qdrant
     {
         private readonly TestConfiguration _testConfig;
 
+        [Experimental("SKEXP0050")]
         public QdrantTest()
         {
             _testConfig = new TestConfiguration();
