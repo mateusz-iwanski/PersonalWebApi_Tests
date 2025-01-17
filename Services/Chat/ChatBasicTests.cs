@@ -11,6 +11,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using LLama.Common;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PersonalWebApi.Tests.Services.Chat
 {
@@ -21,6 +22,7 @@ namespace PersonalWebApi.Tests.Services.Chat
         //private readonly Mock<IPersistentChatHistoryService> _persistentChatHistoryServiceMock;
         private readonly IPersistentChatHistoryService _persistentChatHistoryService;
 
+        [Experimental("SKEXP0050")]
         public ChatBasicTests()
         {
             _testConfig = new TestConfiguration();
