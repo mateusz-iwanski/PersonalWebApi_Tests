@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using PersonalWebApi.Tests.Controllers.Agent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PersonalWebApi.Tests.Services
 {
@@ -16,6 +17,7 @@ namespace PersonalWebApi.Tests.Services
     {
         private readonly TestConfiguration _testConfig;
 
+        [Experimental("SKEXP0050")]
         public AgentTests()
         {
             _testConfig = new TestConfiguration();
