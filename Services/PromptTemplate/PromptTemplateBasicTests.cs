@@ -5,6 +5,7 @@ using PersonalWebApi.Services.Services.History;
 using PersonalWebApi.Tests.Controllers.Agent;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PersonalWebApi.Tests.Services.PromptTemplate
 {
@@ -15,6 +16,7 @@ namespace PersonalWebApi.Tests.Services.PromptTemplate
         //private readonly Mock<IPersistentChatHistoryService> _persistentChatHistoryServiceMock;
         private readonly IPersistentChatHistoryService _persistentChatHistoryService;
 
+        [Experimental("SKEXP0050")]
         public PromptTemplateBasicTests()
         {
             _testConfig = new TestConfiguration();
