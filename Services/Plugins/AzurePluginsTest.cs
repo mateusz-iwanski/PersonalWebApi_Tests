@@ -14,6 +14,7 @@ using PersonalWebApi.Services.Services.History;
 using PersonalWebApi.Tests.Controllers.Agent;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace PersonalWebApi.Tests.Services.Plugins
     {
         private readonly TestConfiguration _testConfig;
         private readonly IConfiguration _configuration;
+
+        [Experimental("SKEXP0050")]
         public AzurePluginsTest()
         {
             _testConfig = new TestConfiguration();
