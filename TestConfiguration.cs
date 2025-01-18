@@ -110,11 +110,11 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 // Register IHttpContextAccessor early
                 kernelBuilder.Services.AddHttpContextAccessor();
 
+                
                 kernelBuilder.Services.AddScoped<IPersistentChatHistoryService, PersistentChatHistoryService>();
                 kernelBuilder.Services.AddScoped<INoSqlDbService, AzureCosmosDbService>();
                 kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
                 kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
-                kernelBuilder.Services.AddScoped<IQdrantService, QdrantService>(); // Ensure this is registered before use
                 kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
                 kernelBuilder.Services.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
                 kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
@@ -128,16 +128,6 @@ namespace PersonalWebApi.Tests.Controllers.Agent
 
                 kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
                 kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
-                {
-                    var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
-                    var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
-                    var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                    var blobStorageConnector = provider.GetRequiredService<IFileStorageService>();
-
-                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blobStorageConnector);
-                });
-
-                serviceCollection.AddScoped<KernelMemoryWrapper>(provider =>
                 {
                     var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
                     var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
@@ -173,11 +163,10 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             });
 
             // Register other necessary services
+            serviceCollection.AddScoped<IQdrantService, QdrantService>();
             serviceCollection.AddScoped<IAccountService, AccountService>();
             serviceCollection.AddScoped<IFileStorageService, AzureBlobStorageService>();
             serviceCollection.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
-            serviceCollection.AddScoped<IQdrantService, QdrantService>(); // Ensure this is registered before use
-            serviceCollection.AddScoped<QdrantRestApiClient>();
             serviceCollection.AddScoped<IEmbedding, EmbeddingOpenAi>();
             serviceCollection.AddScoped<INoSqlDbService, AzureCosmosDbService>();
             serviceCollection.AddScoped<IApiClient, ApiClient>();
