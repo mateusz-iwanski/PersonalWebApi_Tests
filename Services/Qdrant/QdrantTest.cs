@@ -31,30 +31,30 @@ namespace PersonalWebApi.Tests.Services.Qdrant
         [Fact]
         public async Task UploadFileAndAskQuestion()
         {
-            //string filePath = Path.Combine(AppContext.BaseDirectory, "sourcetest/superman_and_me.docx");
-            //if (!File.Exists(filePath))
-            //{
-            //    throw new FileNotFoundException($"The file '{filePath}' does not exist.");
-            //}
+            string filePath = Path.Combine(AppContext.BaseDirectory, "sourcetest/superman_and_me.docx");
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"The file '{filePath}' does not exist.");
+            }
 
-            //using (var stream = new FileStream(filePath, FileMode.Open))
-            //{
-            //    IFormFile formFile = new FormFile(stream, 0, stream.Length, null, Path.GetFileName(filePath))
-            //    {
-            //        Headers = new HeaderDictionary(),
-            //        ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // Set the appropriate content type
-            //    };
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                IFormFile formFile = new FormFile(stream, 0, stream.Length, null, Path.GetFileName(filePath))
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // Set the appropriate content type
+                };
 
-            //    var fileUuid = Guid.NewGuid();
+                var fileUuid = Guid.NewGuid();
 
-            //    QdrantPipelines qdrantPipelines = new QdrantPipelines();
-            //    await qdrantPipelines.Add(
-            //        _testConfig.Kernel,
-            //        new DocumentStepDto(fileUuid, formFile) { Overwrite = true }
-            //        );
+                QdrantPipelines qdrantPipelines = new QdrantPipelines();
+                await qdrantPipelines.Add(
+                    _testConfig.Kernel,
+                    new DocumentStepDto(fileUuid, formFile, Guid.NewGuid(), Guid.NewGuid()) { Overwrite = true }
+                    );
 
-            //}
-            
+            }
+
             // Ask a question
             var question = "Who is the author of Superman and Me?";
 
