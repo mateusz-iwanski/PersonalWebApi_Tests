@@ -5,6 +5,7 @@ using Microsoft.KernelMemory;
 using Microsoft.Rest;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using NetTopologySuite.Utilities;
 using PersonalWebApi.Tests.Controllers.Agent;
 using PersonalWebApi.Utilities.Kql;
 using System;
@@ -129,13 +130,30 @@ namespace PersonalWebApi.Tests.Services.KernelMemory
             string filePath = Path.Combine(AppContext.BaseDirectory, "bajka.docx");
             // "https://personalblobstore.blob.core.windows.net/library/bajka.docx"
 
+            var docId = Guid.NewGuid();
+
             // import document to memory
             // KernelMemoryWrapper.ImportDocumentAsync start
             await _testConfig.Memory.ImportDocumentAsync(
-                filePath,
-                index: conversationUuid.ToString(),
-                documentId: Guid.NewGuid().ToString()
-                );
+                "https://personalblobstore.blob.core.windows.net/personalagent/superman_and_me.docx",
+                //index: conversationUuid.ToString(),
+                documentId: docId.ToString(),
+                steps: Constants.PipelineOnlySummary
+            );
+
+            var results = await _testConfig.Memory.SearchSummariesAsync(filter: MemoryFilters.ByDocument(docId.ToString()));
+
+            foreach (var result in results)
+            {
+                Output.Write($"== {result.SourceName} summary ==\n{result.Partitions.First().Text}\n");
+            }
+
+            results = await _testConfig.Memory.SearchSummariesAsync(filter: MemoryFilters.ByDocument(docId.ToString()));
+
+            foreach (var result in results)
+            {
+                Output.Write($"== {result.SourceName} summary ==\n{result.Partitions.First().Text}\n");
+            }
 
         }
     }
