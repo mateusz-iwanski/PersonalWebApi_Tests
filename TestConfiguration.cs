@@ -79,6 +79,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 .AddJsonFile("appsettings.Qdrant.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.Azure.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.FileStorage.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.StepAgentMappings.json", optional: true, reloadOnChange: true)
                 .AddUserSecrets<Program>()
                 .AddEnvironmentVariables()
                 .Build();
@@ -87,61 +88,52 @@ namespace PersonalWebApi.Tests.Controllers.Agent
             // Manually register services
             serviceCollection.AddScoped<Kernel>(sp =>
             {
-            var kernelBuilder = Kernel.CreateBuilder();
+                var kernelBuilder = Kernel.CreateBuilder();
 
-            var apiKey = configuration.GetSection("OpenAI:Access:ApiKey").Value ??
-                throw new SettingsException("OpenAi ApiKey not exists in appsettings");
+                var apiKey = configuration.GetSection("OpenAI:Access:ApiKey").Value ??
+                    throw new SettingsException("OpenAi ApiKey not exists in appsettings");
 
-            var defaultModelId = configuration.GetSection("OpenAI:DefaultModelId").Value ??
-                throw new SettingsException("OpenAi DefaultModelId not exists in appsettings");
+                var defaultModelId = configuration.GetSection("OpenAI:DefaultModelId").Value ??
+                    throw new SettingsException("OpenAi DefaultModelId not exists in appsettings");
 
-            kernelBuilder.AddOpenAIChatCompletion(
-                defaultModelId,
-                apiKey
-            );
+                kernelBuilder.AddOpenAIChatCompletion(
+                    defaultModelId,
+                    apiKey
+                );
 
-            // Use the correct method to add logging
-            kernelBuilder.Services.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.AddConsole();
-            });
+                kernelBuilder.Services.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.AddConsole();
+                });
 
-            kernelBuilder.Services.AddSingleton<IConfiguration>(configuration);
+                kernelBuilder.Services.AddSingleton<IConfiguration>(configuration);
+                kernelBuilder.Services.AddHttpContextAccessor();
+                kernelBuilder.Services.AddScoped<IEmbedding, EmbeddingOpenAi>();
+                kernelBuilder.Services.AddScoped<IQdrantService, QdrantService>();
+                kernelBuilder.Services.AddScoped<IPersistentChatHistoryService, PersistentChatHistoryService>();
+                kernelBuilder.Services.AddScoped<INoSqlDbService, AzureCosmosDbService>();
+                kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
+                kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
+                kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+                kernelBuilder.Services.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
+                kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
+                kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
+                kernelBuilder.Services.AddScoped<ITextChunker, SemanticKernelTextChunker>();
 
-            // Register IHttpContextAccessor early
-            kernelBuilder.Services.AddHttpContextAccessor();
+                IKernelMemory memory = new KernelMemoryBuilder()
+                    .WithOpenAIDefaults(apiKey)
+                    .Build<MemoryServerless>();
 
+                kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
+                kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
+                {
+                    var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
+                    var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
+                    var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+                    var blobStorageConnector = provider.GetRequiredService<IFileStorageService>();
 
-            kernelBuilder.Services.AddScoped<IPersistentChatHistoryService, PersistentChatHistoryService>();
-            kernelBuilder.Services.AddScoped<INoSqlDbService, AzureCosmosDbService>();
-            kernelBuilder.Services.AddScoped<IAssistantHistoryManager, AssistantHistoryManager>();
-            kernelBuilder.Services.AddScoped<IPromptRenderFilter, RenderedPromptFilterHandler>();
-            kernelBuilder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
-            kernelBuilder.Services.AddScoped<IDocumentReaderDocx, DocumentReaderDocx>();
-            kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
-            kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
-            kernelBuilder.Services.AddScoped<ITextChunker, SemanticKernelTextChunker>();
-            kernelBuilder.Services.AddScoped<IQdrantService, QdrantService>();
-
-            IKernelMemory memory = new KernelMemoryBuilder()
-                .WithOpenAIDefaults(apiKey)
-                .Build<MemoryServerless>();
-
-            kernelBuilder.Services.AddScoped<IKernelMemory>(_ => memory);
-            kernelBuilder.Services.AddScoped<KernelMemoryWrapper>(provider =>
-            {
-                var innerKernelMemory = provider.GetRequiredService<IKernelMemory>();
-                var assistantHistoryManager = provider.GetRequiredService<IAssistantHistoryManager>();
-                var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-                var blobStorageConnector = provider.GetRequiredService<IFileStorageService>();
-
-                return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blobStorageConnector);
-            });
-
-            // add plugin
-            //kernelBuilder.Plugins.AddFromType<KernelMemoryPlugin>();
-            //kernelBuilder.Plugins.AddFromType<AzureBlobPlugin>();
-            //kernelBuilder.Plugins.AddFromType<TagCollectorPlugin>();
+                    return new KernelMemoryWrapper(innerKernelMemory, assistantHistoryManager, httpContextAccessor, blobStorageConnector);
+                });
 
                 return kernelBuilder.Build();
             });
