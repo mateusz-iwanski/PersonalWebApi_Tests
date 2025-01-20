@@ -49,10 +49,9 @@ namespace PersonalWebApi.Tests.Services.Qdrant
 
                 QdrantPipelines qdrantPipelines = new QdrantPipelines();
                 await qdrantPipelines.Add(
-                    _testConfig.Kernel,
+                    QdrantPipelines.PrepareKelnerForPipeline(_testConfig.Configuration),
                     new DocumentStepDto(fileUuid, formFile, Guid.NewGuid(), Guid.NewGuid()) { Overwrite = true }
                     );
-
             }
 
             // Ask a question
