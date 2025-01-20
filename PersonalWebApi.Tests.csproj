@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="appsettings.StepAgentMappings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="appsettings.Azure.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
