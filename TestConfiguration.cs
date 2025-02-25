@@ -28,6 +28,8 @@ using PersonalWebApi.Services.NoSQLDB;
 using PersonalWebApi.Services.Agent;
 using System.Diagnostics.CodeAnalysis;
 using PersonalWebApi.Agent.SemanticKernel.Plugins.DataGathererPlugin;
+using PersonalWebApi.Services.NopCommerce;
+using nopCommerceApiHub.WebApi;
 
 namespace PersonalWebApi.Tests.Controllers.Agent
 {
@@ -80,6 +82,7 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 .AddJsonFile("appsettings.Azure.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.FileStorage.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.StepAgentMappings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.NopCommerceApi.json", optional: true, reloadOnChange: true)
                 .AddUserSecrets<Program>()
                 .AddEnvironmentVariables()
                 .Build();
@@ -119,6 +122,11 @@ namespace PersonalWebApi.Tests.Controllers.Agent
                 kernelBuilder.Services.AddScoped<IWebScrapperClient, Firecrawl>();
                 kernelBuilder.Services.AddScoped<IWebScrapperService, WebScrapperService>();
                 kernelBuilder.Services.AddScoped<ITextChunker, SemanticKernelTextChunker>();
+
+                kernelBuilder.Services.Configure<StolargoPLApiSettings>(configuration.GetSection("NopCommerceStolargoPLApiSettings"));
+                kernelBuilder.Services.Configure<StolargoPLTokentSettings>(configuration.GetSection("NopCommerceStolargoPLTokenSettings"));
+
+                kernelBuilder.Services.AddScoped<NopCommerce>();
 
                 IKernelMemory memory = new KernelMemoryBuilder()
                     .WithOpenAIDefaults(apiKey)
