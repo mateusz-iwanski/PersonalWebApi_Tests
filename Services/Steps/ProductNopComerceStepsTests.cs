@@ -4,7 +4,6 @@ using Microsoft.SemanticKernel;
 using PersonalWebApi.Processes.Document.Models;
 using PersonalWebApi.Processes.FileStorage.Processes;
 using PersonalWebApi.Processes.NopCommerce.Models;
-using PersonalWebApi.Processes.NopCommerce.Processes;
 using PersonalWebApi.Processes.Qdrant.Pipelines;
 using PersonalWebApi.Tests.Controllers.Agent;
 using System;
@@ -37,7 +36,6 @@ namespace PersonalWebApi.Tests.Services.Steps
                 Sku = "BL1"
             };
 
-            CollectDataProcess collectDataProcess = new CollectDataProcess();
             ProductNopPipelines pipeline = new ProductNopPipelines();
             await pipeline.CollectProductPipeline(ProductNopPipelines.PrepareKelnerForPipeline(_testConfig.Configuration), productNopStepDto);
         }
